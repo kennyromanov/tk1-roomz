@@ -26,9 +26,9 @@ export interface ApiOptions {
     body?: string,
     auth?: string,
     bearer?: string,
-    onresponse?: ApiCallback,
-    onsuccess?: ApiCallback,
-    onfail?: ApiCallback,
+    onresponse?: Function,
+    onsuccess?: Function,
+    onfail?: Function,
 }
 
 export interface EmitterSub {
@@ -85,7 +85,7 @@ export function err(e: any): void {
     throw error(e.message, e.stack);
 }
 
-export function env<S extends boolean>(name: string, strict: S = true): S extends true ? string : string|null {
+export function env(name: string, strict: boolean = true): string|null {
     const result = process.env[name.toUpperCase()] ?? null;
     if (strict && !result) throw error(`Env: Cannot get '${name}'`);
     return result;
@@ -104,7 +104,7 @@ export function querify(json: JSON, prefix: string = '', depth: number = 10): st
 
         if (typeof value === 'object' && value !== null)
             result += `&${querify(value, newKey, depth-1)}`;
-        else
+        else if (value !== null)
             result += `&${newKey}=${encodeURIComponent(value)}`;
     }
 
@@ -118,7 +118,10 @@ export async function api(options: ApiOptions): Promise<HttpResponse> {
     const fetchOptions: JSON = {};
     let fetchUrl = options.path;
 
-    const header = (name: string, value: string) => options.headers[name] = value;
+    const header = (name: string, value: string): void => {
+        if (!options.headers) return;
+        options.headers[name] = value;
+    }
 
 
     // Working with the HTTP method
@@ -154,7 +157,7 @@ export async function api(options: ApiOptions): Promise<HttpResponse> {
     // Parsing the response
 
     try {responseJSON = await response.json() as HttpResponse;}
-    catch (e) {throw error(`Error parsing the API response: ${e.message}`, e.stack);}
+    catch (e: any) {throw error(`Error parsing the API response: ${e.message}`, e.stack);}
 
 
     // Calling the callbacks

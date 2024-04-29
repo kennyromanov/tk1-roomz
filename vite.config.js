@@ -6,7 +6,7 @@ export default defineConfig({
     plugins: [
         vue(),
         laravel({
-            input: ['resources/rmzapp/app.js'],
+            input: ['resources/rmzapp/app.mts'],
             refresh: true,
         }),
     ],

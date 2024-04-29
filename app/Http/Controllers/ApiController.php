@@ -27,29 +27,45 @@ class ApiController extends Controller
     {
         try {
             $query = $request->validate([
-                'descr' => 'nullable|string|max:255',
-                'soften' => 'boolean',
-                'limit' => 'integer|max:100',
+                'search' => 'nullable|string|max:255',
+                'soften' => 'nullable|boolean',
+                'picture' => 'nullable|boolean',
+                'minRooms' => 'nullable|integer|min:0',
+                'maxRooms' => 'nullable|integer|min:1',
+                'minArea' => 'nullable|integer|min:0',
+                'maxArea' => 'nullable|integer|min:1',
+                'limit' => 'nullable|integer|max:100',
             ]);
         } catch (\Throwable $e) {
             return error($e->getMessage());
         }
 
-        $descr = $query['descr'] ?? '';
-        $soften = $query['soften'] ?? false;
+        $search = $query['search'] ?? '';
+        $soften = $query['soften'] ?? 0;
+        $picture = $query['picture'] ?? 0;
+        $minRooms = $query['minRooms'] ?? null;
+        $maxRooms = $query['maxRooms'] ?? null;
+        $minArea = $query['minArea'] ?? null;
+        $maxArea = $query['maxArea'] ?? null;
         $limit = $query['limit'] ?? 100;
 
-        $estate = Estate::where('descr', 'like', '%'.$descr.'%');
+        $estate = Estate::where('descr', 'like', '%'.$search.'%');
+
+        if (isset($minRooms)) $estate->whereRaw("num_rooms_bedrooms + num_rooms_livingrooms >= {$minRooms}");
+        if (isset($maxRooms)) $estate->whereRaw("num_rooms_bedrooms + num_rooms_livingrooms <= {$maxRooms}");
+        if (isset($minArea)) $estate->where('num_area', '>=', $minArea);
+        if (isset($maxArea)) $estate->where('num_area', '<=', $maxArea);
+        if ($picture) $estate->whereRaw("picture_filename is not null");
 
         if ($soften) $estate->orderBy(Estate::raw("
             CASE
-                WHEN descr = '{$descr}' THEN 1
-                WHEN descr LIKE '{$descr}%' THEN 2
+                WHEN descr = '{$search}' THEN 1
+                WHEN descr LIKE '{$search}%' THEN 2
                 ELSE 3
             END
-        ", [':value' => $descr]), 'asc');
+        ", [':value' => $search]), 'asc');
 
-        if (!$descr) $estate->orderByRaw('rand()');
+        if (!$search) $estate->orderBy('descr', 'asc');
 
         $found = $estate->limit($limit)->get();
 

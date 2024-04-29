@@ -2,6 +2,7 @@
 
 import * as rmzlib from '../rmzlib.mjs';
 import CoreLink from './_core/CoreLink.vue';
+import {computed} from "vue";
 
 
 const props = defineProps({
@@ -10,10 +11,6 @@ const props = defineProps({
         required: true
     },
     descr: {
-        type: String,
-        required: true
-    },
-    picture: {
         type: String,
         required: true
     },
@@ -34,9 +31,16 @@ const props = defineProps({
         type: Number,
         required: true
     },
+    rooms: {
+        type: Number,
+        required: true
+    },
     floor: {
         type: Number,
         required: true
+    },
+    picture: {
+        type: String,
     },
 });
 
@@ -44,18 +48,21 @@ const currencies: rmzlib.JSON = {
     kzt: '₸',
     usd: '$',
 }
+let picture = computed(() => props.picture ? `/uploads/${props.picture}.jpg` : null);
 
 </script>
 
 <template>
     <CoreLink class="EstateRow" :to="props.link">
         <div class="inner">
-            <img class="image" :src="props.picture" alt="Estate picture">
+            <div class="image">
+                <img v-if="picture" :src="picture" alt="Estate picture">
+            </div>
 
             <div class="info">
                 <div class="info_price">{{ currencies[props.priceCurrency] ?? '?' }}&thinsp;{{ props.price }}</div>
                 <div class="info_address">{{ props.address }}</div>
-                <div class="info_other">{{ props.area }} м², {{ props.floor }} этаж</div>
+                <div class="info_other">{{ props.area }} м², {{ props.rooms }} комн., {{ props.floor }} этаж</div>
             </div>
         </div>
 
@@ -79,12 +86,19 @@ const currencies: rmzlib.JSON = {
         @include rmzlib.block((o: h, gaps: 50px));
 
         .image {
+            flex-shrink: 0;
             width: 250px;
             height: 250px;
+            border: 0.5px solid rgba(black, 0.2);
             border-radius: 5px;
-            object-fit: cover;
-            border: 0.5px solid rgba(black, 0.3);
+            overflow: hidden;
             background: #f6f6f7;
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
         }
 
         .info {

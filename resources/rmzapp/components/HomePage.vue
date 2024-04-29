@@ -8,27 +8,35 @@ import CoreHeader from "./_core/CoreHeader.vue";
 
 
 const estates: Ref<any[]> = ref([]);
+let isReady = ref(false);
 
-rmzlib.Events.on('search', async (data) => estates.value = data.Estates);
+rmzlib.Events.on('search', async (data) => {
+    estates.value = data.Estates;
+    isReady.value = true;
+});
 
 </script>
 
 <template>
     <CorePage class="HomePage">
         <template #header>
-            <CoreHeader></CoreHeader>
+            <CoreHeader class="header" ></CoreHeader>
         </template>
 
         <div class="estate_rows">
+            <p v-if="!isReady && estates.length === 0">Подождите...</p>
+            <p v-if="isReady && estates.length === 0">Ничего не нашлось</p>
+
             <EstateRow v-for="estate of estates"
                 class="estate_row"
                 :link="'/estate/'+estate.id"
                 :descr="estate.descr"
-                :picture="`/uploads/${estate.picture_filename}.jpg`"
+                :picture="estate.picture_filename"
                 :price="estate.price"
                 :priceCurrency="estate.price_currency"
                 :address="`${estate.address_city}, ул. ${estate.address_street}, ${estate.address_house}, ${estate.address_apartment} кв./офис`"
                 :area="estate.num_area"
+                :rooms="estate.num_rooms_bedrooms + estate.num_rooms_livingrooms"
                 :floor="estate.num_floor"
             ></EstateRow>
         </div>
@@ -42,6 +50,10 @@ rmzlib.Events.on('search', async (data) => estates.value = data.Estates);
 .HomePage {
     $vgap: 150px;
     $hgap: 100px;
+
+    .header {
+        z-index: 1;
+    }
 
     .estate_rows {
         @include rmzlib.block((o: h));

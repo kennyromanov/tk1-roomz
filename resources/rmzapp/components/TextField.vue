@@ -25,7 +25,7 @@ const check = (e: any) => {
 
     appearance: none;
     -webkit-appearance: none;
-    padding: 20px 30px;
+    padding: 10px 20px;
     border: none;
     border-radius: 3px;
     outline: none;

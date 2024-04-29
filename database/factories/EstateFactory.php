@@ -88,9 +88,11 @@ class EstateFactory extends Factory
             'usd' => round($price / 450 / 100) * 100,
         };
 
+        $hasPicture = $this->binomial(0, 1, 0.8);
+
         // Setting an image
-        $imageUUID = fake()->uuid();
-        copy('resources/datasets/apartments/'.rand(1, 250).'.jpg', "public/uploads/{$imageUUID}.jpg");
+        $imageUUID = $hasPicture ? fake()->uuid() : null;
+        if ($hasPicture) copy('resources/datasets/apartments/'.rand(1, 250).'.jpg', "public/uploads/{$imageUUID}.jpg");
 
         return [
             'price' => $price,
@@ -107,7 +109,6 @@ class EstateFactory extends Factory
             'num_rooms_other' => $numOthers,
             'num_area' => $sizeArea,
             'num_floor' => $numFloor,
-            'name' => fake()->text(70),
             'descr' => fake()->text(300),
             'picture_filename' => $imageUUID,
         ];
