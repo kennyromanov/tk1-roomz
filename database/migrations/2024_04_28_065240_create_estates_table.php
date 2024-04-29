@@ -40,14 +40,13 @@ return new class extends Migration
             $table->tinyInteger('num_floor')
                 ->unsigned()->default(0)->nullable(false)->comment('Floor in the facility');
 
-            $table->string('name', 128)->nullable(false);
-            $table->text('descr');
+            $table->string('descr', 1024);
             $table->uuid('picture_filename');
 
 
             // Alters
 
-            $table->index('name');
+            $table->index('descr');
 
 
             // Other

@@ -16,6 +16,8 @@ export type HttpResponse = {
     error?: string,
 }
 
+export type EmitterFunc = (data: JSON) => Promise<any>;
+
 export interface ApiOptions {
     path: string,
     method?: HttpMethod,
@@ -29,10 +31,43 @@ export interface ApiOptions {
     onfail?: ApiCallback,
 }
 
+export interface EmitterSub {
+    event: string,
+    func: EmitterFunc,
+}
+
 
 // Classes
 
-class RmzError extends Error {
+export class Emitter {
+    public subs: EmitterSub[] = [];
+
+    public emit(event: string, data: JSON = {}): void {
+        let newData: JSON = {event, ...data};
+
+        for (let sub of this.subs)
+            if ([event, '_all'].includes(sub.event))
+                sub.func(newData).catch(err);
+    }
+
+    public on(event: string, func: EmitterFunc): void {
+        this.subs.push({event, func});
+    }
+}
+
+export class Events {
+    public static emitter: Emitter = new Emitter();
+
+    public static emit(event: string, data: JSON = {}): void {
+        this.emitter.emit(event, data);
+    }
+
+    public static on(event: string, func: EmitterFunc): void {
+        this.emitter.on(event, func);
+    }
+}
+
+export class RmzError extends Error {
     constructor(message: string, stack?: string) {
         super(message);
         if (stack) this.stack = stack;

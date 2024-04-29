@@ -20,12 +20,12 @@ setInterval(() => {
         path: '/api/v1/estates',
         method: 'get',
         query: {
-            name: searchVal,
+            descr: searchVal,
             soften: 1,
             limit: 50,
         },
     }).then((response) => {
-        console.log(response);
+        rmzlib.Events.emit('search', response.data);
     }).catch(rmzlib.err);
 }, 300);
 
@@ -52,14 +52,22 @@ setInterval(() => {
         @include rmzlib.block;
 
         width: 100%;
-        height: 60px;
+        height: 80px;
         position: relative;
         border-radius: 3px;
 
         .TextField {
             width: 100%;
             height: 100%;
-            padding: 0 34px;
+            padding: 0 50px;
+            font-size: 25px;
+            font-weight: 500;
+
+            &:hover {
+                & + .search_logo {
+                    transform: translate(0, calc(-50% - 2px));
+                }
+            }
 
             &:focus, &[data-empty="0"] {
                 & + .search_logo {
@@ -69,15 +77,15 @@ setInterval(() => {
         }
 
         .search_logo {
+            @include rmzlib.h-font;
+
             position: absolute;
             top: 50%;
-            left: 34px;
-            font-family: "Wix Madefor Display Variable", sans-serif;
-            font-size: 26px;
-            font-weight: 500;
+            left: 50px;
             color: #7a8291;
             pointer-events: none;
             transform: translate(0, -50%);
+            transition: transform 0.5s;
 
             span {
                 font-weight: 700;

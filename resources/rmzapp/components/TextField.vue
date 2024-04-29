@@ -29,8 +29,15 @@ const check = (e: any) => {
     border: none;
     border-radius: 3px;
     outline: none;
+    box-sizing: border-box;
     color: #000;
     background: #ececf1;
+    transition: background 0.4s, box-shadow 0.5s;
+
+    &:focus {
+        background: white;
+        box-shadow: 0 2px 100px rgba(black, 0.2);
+    }
 }
 
 </style>

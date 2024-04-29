@@ -32,6 +32,12 @@
     font-weight: 400;
 }
 
+@mixin h-font() {
+    font-family: "Wix Madefor Display Variable", sans-serif;
+    font-size: 30px;
+    font-weight: 500;
+}
+
 @mixin elem($options: ()) {
     $defaults: (
         o: v,
@@ -57,5 +63,4 @@
 
 @mixin block($options: ()) {
     @include elem($options);
-    overflow: hidden;
 }

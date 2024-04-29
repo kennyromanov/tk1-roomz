@@ -27,7 +27,7 @@ class ApiController extends Controller
     {
         try {
             $query = $request->validate([
-                'name' => 'string|max:255',
+                'descr' => 'nullable|string|max:255',
                 'soften' => 'boolean',
                 'limit' => 'integer|max:100',
             ]);
@@ -35,22 +35,24 @@ class ApiController extends Controller
             return error($e->getMessage());
         }
 
-        $name = $query['name'] ?? '';
+        $descr = $query['descr'] ?? '';
         $soften = $query['soften'] ?? false;
         $limit = $query['limit'] ?? 100;
 
-        if ($soften) $user = Estate::where('name', 'like', '%'.$name.'%')->orderBy(Estate::raw('
-            IF(name = ":value", 1, 0) AND
-            IF(name LIKE ":value%", 1, 0) AND
-            IF(name LIKE "%:value%", 1, 0) AND
-            name
-        ', [':value' => $name]), 'asc');
-        else $user = Estate::where('name', $name);
+        $estate = Estate::where('descr', 'like', '%'.$descr.'%');
 
-        $user->limit($limit);
+        if ($soften) $estate->orderBy(Estate::raw("
+            CASE
+                WHEN descr = '{$descr}' THEN 1
+                WHEN descr LIKE '{$descr}%' THEN 2
+                ELSE 3
+            END
+        ", [':value' => $descr]), 'asc');
 
-        $found = $user->get();
+        if (!$descr) $estate->orderByRaw('rand()');
 
-        return json(['Estates' => $found->toArray()]);
+        $found = $estate->limit($limit)->get();
+
+        return json(['Estates' => $found]);
     }
 }
