@@ -38,7 +38,7 @@ import CoreHeader from './CoreHeader.vue';
     }
 
     .content, .footer {
-        margin-top: 20px;
+        margin-top: 80px;
     }
 }
 

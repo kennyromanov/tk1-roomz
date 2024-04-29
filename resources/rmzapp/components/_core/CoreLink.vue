@@ -7,11 +7,16 @@ const props = defineProps({
 </script>
 
 <template>
-    <RouterLink :to="props.to"><slot></slot></RouterLink>
+    <RouterLink class="CoreLink" :to="props.to"><slot></slot></RouterLink>
 </template>
 
 <style scoped lang="scss">
 
 @use '../../rmzlib';
+
+.CoreLink {
+    color: unset;
+    text-decoration: none;
+}
 
 </style>

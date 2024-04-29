@@ -27,30 +27,48 @@ class ApiController extends Controller
     {
         try {
             $query = $request->validate([
-                'name' => 'string|max:255',
-                'soften' => 'boolean',
-                'limit' => 'integer|max:100',
+                'search' => 'nullable|string|max:255',
+                'soften' => 'nullable|boolean',
+                'picture' => 'nullable|boolean',
+                'minRooms' => 'nullable|integer|min:0',
+                'maxRooms' => 'nullable|integer|min:1',
+                'minArea' => 'nullable|integer|min:0',
+                'maxArea' => 'nullable|integer|min:1',
+                'limit' => 'nullable|integer|max:100',
             ]);
         } catch (\Throwable $e) {
             return error($e->getMessage());
         }
 
-        $name = $query['name'] ?? '';
-        $soften = $query['soften'] ?? false;
+        $search = $query['search'] ?? '';
+        $soften = $query['soften'] ?? 0;
+        $picture = $query['picture'] ?? 0;
+        $minRooms = $query['minRooms'] ?? null;
+        $maxRooms = $query['maxRooms'] ?? null;
+        $minArea = $query['minArea'] ?? null;
+        $maxArea = $query['maxArea'] ?? null;
         $limit = $query['limit'] ?? 100;
 
-        if ($soften) $user = Estate::where('name', 'like', '%'.$name.'%')->orderBy(Estate::raw('
-            IF(name = ":value", 1, 0) AND
-            IF(name LIKE ":value%", 1, 0) AND
-            IF(name LIKE "%:value%", 1, 0) AND
-            name
-        ', [':value' => $name]), 'asc');
-        else $user = Estate::where('name', $name);
+        $estate = Estate::where('descr', 'like', '%'.$search.'%');
 
-        $user->limit($limit);
+        if (isset($minRooms)) $estate->whereRaw("num_rooms_bedrooms + num_rooms_livingrooms >= {$minRooms}");
+        if (isset($maxRooms)) $estate->whereRaw("num_rooms_bedrooms + num_rooms_livingrooms <= {$maxRooms}");
+        if (isset($minArea)) $estate->where('num_area', '>=', $minArea);
+        if (isset($maxArea)) $estate->where('num_area', '<=', $maxArea);
+        if ($picture) $estate->whereRaw("picture_filename is not null");
 
-        $found = $user->get();
+        if ($soften) $estate->orderBy(Estate::raw("
+            CASE
+                WHEN descr = '{$search}' THEN 1
+                WHEN descr LIKE '{$search}%' THEN 2
+                ELSE 3
+            END
+        ", [':value' => $search]), 'asc');
 
-        return json(['Estates' => $found->toArray()]);
+        if (!$search) $estate->orderBy('descr', 'asc');
+
+        $found = $estate->limit($limit)->get();
+
+        return json(['Estates' => $found]);
     }
 }

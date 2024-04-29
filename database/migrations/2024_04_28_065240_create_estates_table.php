@@ -40,14 +40,13 @@ return new class extends Migration
             $table->tinyInteger('num_floor')
                 ->unsigned()->default(0)->nullable(false)->comment('Floor in the facility');
 
-            $table->string('name', 128)->nullable(false);
-            $table->text('descr');
-            $table->uuid('picture_filename');
+            $table->string('descr', 1024);
+            $table->uuid('picture_filename')->nullable();
 
 
             // Alters
 
-            $table->index('name');
+            $table->index('descr');
 
 
             // Other
@@ -62,6 +61,12 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('estates');
+
+        $files = glob($this->dirUploads.'/*.*');
+
+        foreach ($files as $file)
+            if (is_file($file))
+                unlink($file);
 
         if (is_dir($this->dirUploads)) rmdir($this->dirUploads);
     }
