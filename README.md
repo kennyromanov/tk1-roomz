@@ -1,5 +1,7 @@
 # The Roomz TK
 
+This project is a clear representation of my skills as a Fullstack Web Developer and Software Engineer. It runs on top of the Laravel Framework + Vue.js Framework. Please contact me if you have any questions or suggestions. 🌿 
+
 ### Installation:
 
 1. Install the latest Composer/Laravel version.
