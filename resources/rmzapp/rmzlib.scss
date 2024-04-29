@@ -1,0 +1,61 @@
+/*
+ *  The Roomz UI Library
+ */
+
+
+/* Fonts */
+
+@import "/resources/fonts/Custom";
+
+
+/* Convertors */
+
+@function o-to-raw($o) {
+    @return map-get((
+        h: row,
+        horizontal: row,
+        r: row,
+        row: row,
+        v: column,
+        vertical: column,
+        c: column,
+        column: column,
+    ), $o);
+}
+
+
+/* Framework */
+
+@mixin p-font() {
+    font-family: "Inter Variable", sans-serif;
+    font-size: 22px;
+    font-weight: 400;
+}
+
+@mixin elem($options: ()) {
+    $defaults: (
+        o: v,
+        gaps: 0px,
+    );
+
+    $options: map-merge($defaults, $options);
+    $o: map-get($options, o);
+    $gaps: map-get($options, gaps);
+
+    $o-raw: o-to-raw($o);
+
+    @if ($o-raw == 'column') {
+        > * + * {margin-top: $gaps;}
+    } @else if ($o-raw == 'row') {
+        > * + * {margin-left: $gaps;}
+    }
+
+    display: flex;
+    flex-direction: o-to-raw($o);
+    box-sizing: border-box;
+}
+
+@mixin block($options: ()) {
+    @include elem($options);
+    overflow: hidden;
+}
